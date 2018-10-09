@@ -121,7 +121,6 @@ class InstallWebDirCommand extends AbstractLockedCommand
 
         $projectDir = $input->getArgument('path');
         // Set output path to project path if not overwriten by argv
-        $projectDir = $input->getArgument('path');
         if (false === $projectDir) {
             $projectDir = rtrim($this->getContainer()->get('kernel')->getRootDir(), 'app/');
         }
