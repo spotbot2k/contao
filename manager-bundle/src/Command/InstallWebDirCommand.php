@@ -48,7 +48,7 @@ class InstallWebDirCommand extends AbstractLockedCommand
                 'path',
                 InputArgument::OPTIONAL,
                 'The installation root directory',
-                getcwd()
+                false
             )
             ->addOption(
                 'no-dev',
@@ -120,6 +120,11 @@ class InstallWebDirCommand extends AbstractLockedCommand
         $this->io = new SymfonyStyle($input, $output);
 
         $projectDir = $input->getArgument('path');
+        // Set output path to project path if not overwriten by argv
+        $projectDir = $input->getArgument('path');
+        if (false === $projectDir) {
+            $projectDir = rtrim($this->getContainer()->get('kernel')->getRootDir(), 'app/');
+        }
         $webDir = rtrim($projectDir, '/').'/web';
 
         $this->addFiles($webDir, !$input->getOption('no-dev'));
