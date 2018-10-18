@@ -88,10 +88,9 @@ class InstallWebDirCommand extends AbstractLockedCommand
         $password = $input->getOption('password');
         
         if (getcwd() !== $this->projectDir) {
-            if (!$helper->ask($input, $output, new ConfirmationQuestion(sprintf('Use project path in %s? (y|n)', $this->projectDir), false))) {
-                throw new \InvalidArgumentException('Aborted by user');
+            if ($helper->ask($input, $output, new ConfirmationQuestion(sprintf('Use project path in %s? (y|n)', $this->projectDir), false))) {
+                $input->setArgument('path', $this->projectDir);
             }
-            $input->setArgument('path', $this->projectDir);
         }
 
         if ((false !== $user || false !== $password) && true === $input->getOption('no-dev')) {
