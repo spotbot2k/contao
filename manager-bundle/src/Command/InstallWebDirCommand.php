@@ -19,6 +19,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\Question;
+use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
@@ -35,6 +36,8 @@ class InstallWebDirCommand extends AbstractLockedCommand
      * @var SymfonyStyle
      */
     private $io;
+    
+    private $projectDir;
 
     /**
      * {@inheritdoc}
@@ -48,7 +51,7 @@ class InstallWebDirCommand extends AbstractLockedCommand
                 'path',
                 InputArgument::OPTIONAL,
                 'The installation root directory',
-                false
+                getcwd()
             )
             ->addOption(
                 'no-dev',
@@ -78,8 +81,18 @@ class InstallWebDirCommand extends AbstractLockedCommand
      */
     protected function interact(InputInterface $input, OutputInterface $output): void
     {
+        /** @var QuestionHelper $helper */
+        $helper = $this->getHelper('question');
+        
         $user = $input->getOption('user');
         $password = $input->getOption('password');
+        
+        if (getcwd() !== $this->projectDir) {
+            if (!$helper->ask($input, $output, new ConfirmationQuestion(sprintf('Use project path in %s? (y|n)', $this->projectDir), false))) {
+                throw new \InvalidArgumentException('Aborted by user');
+            }
+            $input->setArgument('path', $this->projectDir);
+        }
 
         if ((false !== $user || false !== $password) && true === $input->getOption('no-dev')) {
             throw new \InvalidArgumentException('Cannot set a password in no-dev mode!');
@@ -245,5 +258,10 @@ class InstallWebDirCommand extends AbstractLockedCommand
         }
 
         return true;
+    }
+    
+    public function setProjectDir(string $projectDir): void
+    {
+        $this->projectDir = $projectDir;
     }
 }
